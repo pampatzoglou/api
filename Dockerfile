@@ -8,7 +8,7 @@ WORKDIR /app
 COPY . .
 RUN go mod download && go mod tidy
 EXPOSE 8000 9000
-HEALTHCHECK --interval=5m --timeout=3s CMD curl --fail http://localhost:8000/ || exit 1
+HEALTHCHECK --interval=5m --timeout=3s CMD curl --fail http://localhost:9000/live || exit 1
 CMD ["go", "run", "./cmd"]
 
 FROM golang:1.18.3-alpine3.16 AS build
@@ -27,6 +27,6 @@ COPY --from=build /app/cmd/app /usr/local/app
 EXPOSE 8000 9000
 USER nobody:nobody
 
-HEALTHCHECK --interval=5m --timeout=3s CMD curl --fail http://localhost:8000/ || exit 1
+HEALTHCHECK --interval=5m --timeout=3s CMD curl --fail http://localhost:9000/live || exit 1
 ENTRYPOINT ["/usr/local/app"]
 

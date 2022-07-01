@@ -42,34 +42,26 @@ spec:
             value: InfoLevel
           - name: HEALTH_PORT
             value: "9000"
-          {{- if .Values.resources.requests.cpu }}
           - name: CPU_REQUEST
             valueFrom:
               resourceFieldRef:
                 containerName: {{ .Chart.Name }}
                 resource: requests.cpu
-          {{ end }}
-          {{- if .Values.resources.limit.cpu }}
           - name: CPU_LIMIT
             valueFrom:
               resourceFieldRef:
                 containerName: {{ .Chart.Name }}
                 resource: limits.cpu
-          {{ end }}
-          {{- if .Values.resources.requests.memory }}
           - name: MEM_REQUEST
             valueFrom:
               resourceFieldRef:
                 containerName: {{ .Chart.Name }}
                 resource: requests.memory
-          {{ end }}
-          {{- if .Values.resources.limit.memory }}
           - name: MEM_LIMIT
             valueFrom:
               resourceFieldRef:
                 containerName: {{ .Chart.Name }}
                 resource: limits.memory
-          {{ end }}
           - name: MONGO_CONNECTOR
             valueFrom:
             secretKeyRef:

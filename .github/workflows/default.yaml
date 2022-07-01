@@ -35,6 +35,10 @@ jobs:
           chmod a+x /usr/local/bin/helmfile
           helm plugin install https://github.com/databus23/helm-diff
       - name: Lint Helmfile
+        env:
+          PAT: ${{ secrets.PAT }}
+          MONGODB_USERNAME: foo
+          MONGODB_PASSWORD: bar
         run: |
           helmfile --file deployments/helmfile.d/ lint
       - name: golangci-lint
