@@ -1,12 +1,17 @@
+bases:
+- ../../environments.yaml
+
 helmDefaults:
   createNamespace: true
   wait: true
+  timeout: 120
 
 releases:
 - name: graph
-  namespace: graph
+  namespace: api
   chart: ../helm/
   labels:
-    app: graphql
+    app: api
+    tier: backend
   values:
   - config/graph/graph-values.yaml.gotmpl

@@ -1,1 +1,10 @@
+image:
+  repository: ghcr.io/pampatzoglou/api
+  pullPolicy: IfNotPresent
+  tag: {{ env "TAG" }}
+  imageCredentials:
+    registry: ghcr.io
+    username: {{ .Environment.Values.registry.username }}
+    password: {{ .Environment.Values.registry.password }}
+    email: {{ .Environment.Values.registry.email }}
 
