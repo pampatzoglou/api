@@ -15,5 +15,5 @@ jobs:
       - name: Setup Kind for ${{ matrix.environments }} environment
         uses: engineerd/setup-kind@v0.5.0
       - name: Setup tmate session
-        if: {{ env.RUNNER_DEBUG }}=="1"
+        if: ${{ env.RUNNER_DEBUG }}=="1"
         uses: mxschmitt/action-tmate@v3
