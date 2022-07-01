@@ -64,9 +64,9 @@ spec:
                 resource: limits.memory
           - name: MONGO_CONNECTOR
             valueFrom:
-            secretKeyRef:
-              name: {{ include "graph.fullname" . }}-mongo
-              key: connector
+              secretKeyRef:
+                name: {{ include "graph.fullname" . }}-mongo
+                key: connector
           ports:
             - name: http
               containerPort: 8000
