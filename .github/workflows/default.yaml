@@ -215,11 +215,12 @@ jobs:
           curl -L https://github.com/roboll/helmfile/releases/download/v0.142.0/helmfile_linux_amd64 --output /usr/local/bin/helmfile
           chmod a+x /usr/local/bin/helmfile
           helm plugin install https://github.com/databus23/helm-diff
-      - name: Install
+      - name: Deploy
         env:
           REGISTRY: ghcr.io/${{ github.repository }}
           REGISTRY_USER: ${{ github.actor }}
           REGISTRY_PAT: ${{ secrets.PAT }}
+          TAG: ${{ github.sha }}
           MONGODB_USERNAME: foo
           MONGODB_PASSWORD: bar
         run: |
