@@ -5,15 +5,15 @@
 replicaCount: 1
 
 image:
-  repository: ghcr.io/pampatzoglou
+  repository: ghcr.io/pampatzoglou/api
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: master
   imageCredentials:
-    registry: ghcr.io/pampatzoglou
-    username: ""
-    password: ""
-    email: ""
+    registry: ghcr.io
+    username: foo
+    password: bar
+    email: zar
 
 imagePullSecrets: []
 nameOverride: ""
