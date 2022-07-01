@@ -194,10 +194,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - uses: engineerd/setup-kind@v0.7.0
-      - name: Test cluster init
+      - uses: actions/setup-go@v1
+        with:
+          go-version: 1.18
+      - name: Install latest version of Kind
+        run: |
+          GO111MODULE=on go get sigs.k8s.io/kind
+      - name: Create Kind cluster
+        run: |
+          PATH=$(go env GOPATH)/bin:$PATH kind create cluster --config ./deployments/kind-config.yaml
+      - name: Run some sanity checks
         run: |
           kubectl cluster-info
+          kubectl get nodes -o wide
+          kubectl get pods --all-namespaces -o wide
+          kubectl get services --all-namespaces -o wide
           kubectl get pods -n kube-system
       - name: Setup helmfile
         run: |
@@ -214,7 +225,7 @@ jobs:
         run: |
           helmfile --file deployments/helmfile.d/ -e ${{ matrix.environments }} apply
       - name: Setup tmate session
-        #if: ${{ failure() }}
+        if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
 
   build-push-master:
