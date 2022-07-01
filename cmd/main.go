@@ -23,8 +23,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-
-	"github.com/heptiolabs/healthcheck"
 )
 
 func recordMetrics() {
@@ -74,14 +72,14 @@ func main() {
 		log.Error("Something failed but I'm not quitting.")
 	*/
 	fs := http.FileServer(http.Dir("./web/static"))
-	h := healthcheck.NewHandler()
+	//h := healthpeak.NewHandler()
 	// Our app is not happy if we've got more than 100 goroutines running.
-	h.AddLivenessCheck("goroutine-threshold", healthcheck.GoroutineCountCheck(100))
+	//h.AddLivenessCheck("goroutine-threshold", healthpeak.GoroutineCountCheck(100))
 	//h.AddReadinessCheck("mongo", mongo.HealthCheck(mongoClient, ctx))
-	err = http.ListenAndServe("0.0.0.0:"+cfg.Server.HealthPort, h)
-	if err != nil {
-		log.Fatal(err)
-	}
+	//err = http.ListenAndServe("0.0.0.0:"+cfg.Server.HealthPort, h)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 	http.Handle("/", fs)
 	http.Handle("/playground", playground.Handler("GraphQL playground", "/query"))
