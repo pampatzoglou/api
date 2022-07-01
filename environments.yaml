@@ -2,7 +2,7 @@ environments:
   default:
     values:
     - registry:
-        provider: {{ requiredEnv "REGISTRY"}}
+        provider: ghcr.io/pampatzoglou
         username: {{ requiredEnv "REGISTRY_USER"}}
         password: {{ requiredEnv "REGISTRY_PAT" }}
         email:    devops+api@foo.ddd
