@@ -74,14 +74,6 @@ spec:
             - name: health
               containerPort: 9000
               protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /live
-              port: health
-          readinessProbe:
-            httpGet:
-              path: /ready
-              port: health
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
