@@ -33,18 +33,50 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: SERVER_PORT
+            value: 8000
+          - name: LOG_LEVEL
+            value: InfoLevel
+          - name: HEALTH_PORT
+            value: 9000
+          - name: CPU_REQUEST
+            valueFrom:
+              resourceFieldRef:
+                containerName: {{ .Chart.Name }}
+                resource: requests.cpu
+          - name: CPU_LIMIT
+            valueFrom:
+              resourceFieldRef:
+                containerName: {{ .Chart.Name }}
+                resource: limits.cpu
+          - name: MEM_REQUEST
+            valueFrom:
+              resourceFieldRef:
+                containerName: {{ .Chart.Name }}
+                resource: requests.memory
+          - name: MEM_LIMIT
+            valueFrom:
+              resourceFieldRef:
+                containerName: {{ .Chart.Name }}
+                resource: limits.memory
+
+
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 8000
+              protocol: TCP
+            - name: health
+              containerPort: 9000
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /
-              port: http
+              path: /live
+              port: health
           readinessProbe:
             httpGet:
-              path: /
-              port: http
+              path: /ready
+              port: health
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
