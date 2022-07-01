@@ -1,0 +1,69 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+type Shop{ 
+  id: ID!
+  name: String!
+  banner:
+    base64: String
+    url: String
+  homepage: String
+  location:
+    street: String!
+    number: String!
+    town: String!
+    coordinates:
+      latitude: String
+      longitude: String
+  telephone: [Int]
+  owner: [Owner!]!
+  items: [Item!]!
+}
+
+type Owner {
+  id: ID!
+  name: String!
+  surname: String!
+  taxid: String!
+  contact:
+    telephone: Int
+    email: String!
+}
+
+type Item {
+  id: ID!
+  name: String!
+  image:
+    base64: String
+    url: String
+  description: String
+  reviews: [Review]
+  price: (unit: Euro = CURRENCY): Float!
+}
+
+
+type Todo {
+  id: ID!
+  text: String!
+  done: Boolean!
+  user: User!
+}
+
+type User {
+  id: ID!
+  name: String!
+}
+
+type Query {
+  todos: [Todo!]!
+}
+
+input NewTodo {
+  text: String!
+  userId: String!
+}
+
+type Mutation {
+  createTodo(input: NewTodo!): Todo!
+}

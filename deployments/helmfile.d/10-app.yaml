@@ -1,0 +1,12 @@
+helmDefaults:
+  createNamespace: true
+  wait: true
+
+releases:
+- name: graph
+  namespace: graph
+  chart: ../helm/
+  labels:
+    app: graphql
+  values:
+  - config/graph/graph-values.yaml.gotmpl

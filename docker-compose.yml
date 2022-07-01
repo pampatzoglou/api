@@ -1,0 +1,74 @@
+version: '3.4'
+
+networks:
+  app-tier:
+    driver: bridge
+
+services:
+  redis:
+    image: bitnami/redis:latest
+    container_name: redis
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-redispass}
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    ports:
+      - 6379
+    networks:
+      - app-tier
+    restart: unless-stopped
+    volumes:
+      - ${PWD}/deployments/local/redis/redisoverrides.conf:/opt/bitnami/redis/mounted-etc/overrides.conf:ro
+      - ${PWD}/deployments/local/redis/rejson.so:/rejson/rejson.so:ro
+  mongo:
+    image: bitnami/mongodb:latest
+    container_name: mongo
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - MONGODB_EXTRA_FLAGS=--wiredTigerCacheSizeGB=2
+      - MONGODB_ROOT_PASSWORD=${MONGODB_ROOT_PASSWORD:-mongorootpass}
+      - MONGODB_USERNAME=${MONGODB_USERNAME:-mongouser}
+      - MONGODB_PASSWORD=${MONGODB_PASSWORD:-mongopass}
+      - MONGODB_ENABLE_DIRECTORY_PER_DB=yes
+      - MONGODB_DATABASE=db
+    ports:
+      - 27017
+    networks:
+      - app-tier
+    restart: unless-stopped
+    volumes:
+      - ${PWD}/deployments/local/mongo/data:/bitnami/mongodb/data:rw
+      - ${PWD}/deployments/local/mongo/mongo-init/:/docker-entrypoint-initdb.d/:ro
+  mongo-ui:
+    image: mongo-express
+    container_name: mongo-express
+    depends_on:
+      - mongo
+    environment:
+      - ME_CONFIG_OPTIONS_EDITORTHEME="ambiance"
+      - ME_CONFIG_MONGODB_URL=mongodb://${MONGODB_USERNAME:-mongouser}:${MONGODB_PASSWORD:-mongopass}@mongo:27017/db
+    ports:
+      - 8081:8081
+    restart: unless-stopped
+    networks:
+      - app-tier
+  api:
+    image: ghcr.io/pampatzoglou/api:development
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: api
+    depends_on:
+      - mongo
+    environment:
+      - PORT=8000
+      - MONGO_CONNECTOR=mongodb://${MONGODB_USERNAME:-mongouser}:${MONGODB_PASSWORD:-mongopass}@mongo:27017/db
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-redispass}
+    ports:
+      - 8000:8000
+    networks:
+      - app-tier
+    restart: unless-stopped

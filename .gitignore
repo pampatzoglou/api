@@ -13,3 +13,9 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+deployments/local/mongo/data
+deployments/local/mongo/data/**
+deployments/local/mongo/data/db
+deployments/local/mongo/data/db/**
+!deployments/local/redis/rejson.so

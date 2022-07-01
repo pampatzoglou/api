@@ -1,0 +1,8 @@
+**.md
+**.env
+./.github/**
+./.dockerignore
+./.gitignore
+./Dockerfile
+./docker-compose.yml
+./deployments/**

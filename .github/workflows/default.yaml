@@ -1,0 +1,215 @@
+name: default
+on:
+  push:
+    branches:
+    - "*"
+jobs:
+  credentials:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref }} # necessary for pull request workflow trigger
+      - name: trufflehog-actions-scan
+        uses: edplato/trufflehog-actions-scan@master
+        with:
+          scanArguments: "--regex --entropy=True --max_depth=1 --rules /regexes.json" # Add custom options here*
+      - name: Check password
+        uses: AlicanAkkus/pinder-action@0.1
+
+  lint:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: hadolint/hadolint-action@v2.0.0
+        with:
+          dockerfile: Dockerfile
+      - name: Lint helm
+        run: |
+          helm lint ./deployments/helm
+      - name: Setup helmfile
+        run: |
+          curl -L https://github.com/roboll/helmfile/releases/download/v0.142.0/helmfile_linux_amd64 --output /usr/local/bin/helmfile
+          chmod a+x /usr/local/bin/helmfile
+          helm plugin install https://github.com/databus23/helm-diff
+      - name: Lint Helmfile
+        run: |
+          helmfile --file deployments/helmfile.d/ lint
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          working-directory: .
+          github-token: ${{ secrets.PAT }}
+          only-new-issues: false
+          skip-cache: true
+          skip-pkg-cache: true
+          skip-build-cache: true
+
+  test:
+    strategy:
+      matrix:
+        go-version: ["1.18.x"]
+        platform: ["ubuntu-latest"]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Install Go
+        if: success()
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Calc coverage
+        run: |
+          go test ./cmd -v -covermode=count -coverprofile=coverage.out
+      - name: Convert coverage.out to coverage.lcov
+        uses: jandelgado/gcov2lcov-action@v1.0.6
+      - name: Upload scan reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-${{ github.sha }}
+          path: coverage.lcov
+          retention-days: 30
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 5
+
+  build-push-development:
+    needs:
+      - lint
+      - test
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_CONTENT_TRUST: 1
+    steps:
+      - uses: actions/checkout@master
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.PAT }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache/${{ github.repository }}
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+              ${{ runner.os }}-buildx-
+      - name: Build and Push
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          tags: ghcr.io/${{ github.repository }}:${{ github.sha }}
+          target: development
+          load: false
+          cache-from: type=local,src=/tmp/.buildx-cache/${{ github.repository }}
+          cache-to: type=local,dest=/tmp/.buildx-cache/${{ github.repository }}-new
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache/${{ github.repository }}
+          mv /tmp/.buildx-cache/${{ github.repository }}-new /tmp/.buildx-cache/${{ github.repository }}
+
+  DevSecOps:
+    needs:
+      - credentials
+      - build-push-development
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_CONTENT_TRUST_SERVER: https://notary.docker.io
+    steps:
+      - uses: actions/checkout@master
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.PAT }}
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache/${{ github.repository }}
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+      - name: Cache vdb
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.vdb
+          key: ${{ runner.os }}-vdb-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-vdb-
+      - name: Scan
+        uses: ShiftLeftSecurity/scan-action@master
+        env:
+          VDB_HOME: /tmp/.vdb
+          WORKSPACE: https://github.com/${{ github.repository }}/blob/${{ github.sha }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+          SCAN_AUTO_BUILD: true
+        with:
+          output: reports
+          type: "credscan,go,depscan"
+      - name: Upload scan reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: shiftleft-reports-${{ github.sha }}
+          path: reports
+          retention-days: 30
+      #- name: Azure/container-scan
+      #  uses: azure/container-scan@v0
+      #  env:
+      #    DOCKER_CONTENT_TRUST: 1
+      #  with:
+      #    image-name: ghcr.io/${{ github.repository }}:${{ github.sha }}
+      #    username: ${{ github.actor }}
+      #    password: ${{ secrets.PAT }}
+      #    severity-threshold: LOW
+      #    run-quality-checks: false
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 5
+
+  build-push-master:
+    if: github.ref == 'refs/heads/master'
+    needs:
+      - credentials
+      - build-push-development
+      - DevSecOps
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_CONTENT_TRUST: 1
+    steps:
+      - uses: actions/checkout@master
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.PAT }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache/${{ github.repository }}
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+              ${{ runner.os }}-buildx-
+      - name: Build and Push
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          tags: ghcr.io/${{ github.repository }}:master
+          target: production
+          load: false
+          cache-from: type=local,src=/tmp/.buildx-cache/${{ github.repository }}
+          cache-to: type=local,dest=/tmp/.buildx-cache/${{ github.repository }}-new
