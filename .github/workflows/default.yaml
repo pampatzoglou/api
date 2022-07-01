@@ -190,7 +190,7 @@ jobs:
     needs:
       - credentials
       - build-push-development
-    timeout-minutes: 5
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -213,6 +213,9 @@ jobs:
           MONGODB_PASSWORD: bar
         run: |
           helmfile --file deployments/helmfile.d/ -e ${{ matrix.environments }} apply
+      - name: Setup tmate session
+        #if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
 
   build-push-master:
     if: github.ref == 'refs/heads/master'
