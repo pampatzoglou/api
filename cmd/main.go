@@ -66,20 +66,22 @@ func main() {
 	// Release resource when the main
 	// function is returned.
 	defer mongo.Close(mongoClient, ctx, cancel)
-
-	log.Trace("Something very low level.")
-	log.Debug("Useful debugging information.")
-	log.Info("Something noteworthy happened!")
-	log.Warn("You should probably take a look at this.")
-	log.Error("Something failed but I'm not quitting.")
-
+	/*
+		log.Trace("Something very low level.")
+		log.Debug("Useful debugging information.")
+		log.Info("Something noteworthy happened!")
+		log.Warn("You should probably take a look at this.")
+		log.Error("Something failed but I'm not quitting.")
+	*/
 	fs := http.FileServer(http.Dir("./web/static"))
 	h := healthcheck.NewHandler()
 	// Our app is not happy if we've got more than 100 goroutines running.
 	h.AddLivenessCheck("goroutine-threshold", healthcheck.GoroutineCountCheck(100))
 	//h.AddReadinessCheck("mongo", mongo.HealthCheck(mongoClient, ctx))
-	http.ListenAndServe("0.0.0.0:"+cfg.Server.HealthPort, h)
-
+	err = http.ListenAndServe("0.0.0.0:"+cfg.Server.HealthPort, h)
+	if err != nil {
+		log.Fatal(err)
+	}
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 	http.Handle("/", fs)
 	http.Handle("/playground", playground.Handler("GraphQL playground", "/query"))
@@ -103,8 +105,4 @@ __schema {
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-func NewHandler() {
-	panic("unimplemented")
 }

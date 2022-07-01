@@ -1,7 +1,6 @@
 package health
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/hootsuite/healthchecks"
@@ -23,7 +22,6 @@ func CheckStatus() healthchecks.StatusList {
 	s := healthchecks.Status{
 		Description: "mongo",
 		Result:      healthchecks.OK,
-		Details:     "",
 	}
 
 	// Make sure the pong response is what we expected
@@ -31,7 +29,6 @@ func CheckStatus() healthchecks.StatusList {
 		s = healthchecks.Status{
 			Description: "mongo",
 			Result:      healthchecks.CRITICAL,
-			Details:     fmt.Sprintf("Expecting `true` response, got `%s`", pong),
 		}
 	}
 
