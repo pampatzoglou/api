@@ -4,6 +4,7 @@ bases:
 helmDefaults:
   createNamespace: true
   wait: true
+  timeout: 120
 
 repositories:
 - name: bitnami
@@ -11,9 +12,10 @@ repositories:
 
 releases:
 - name: mongo
-  namespace: graph
+  namespace: api
   chart:     bitnami/mongodb
   version:   12.1.20
   labels:
     app: mongo
+    tier: backend
   condition: mongo.enabled

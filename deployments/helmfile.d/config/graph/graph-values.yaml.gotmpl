@@ -7,3 +7,14 @@ image:
     username: {{ .Environment.Values.registry.username }}
     password: {{ .Environment.Values.registry.password }}
     email: {{ .Environment.Values.registry.email }}
+
+podSecurityContext:
+  fsGroup: 2000
+
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
