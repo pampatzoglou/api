@@ -12,8 +12,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - name: Setup Kind for ${{ matrix.environments }} environment
-        uses: engineerd/setup-kind@v0.5.0
+      - uses: actions/setup-go@v1
+        with:
+          go-version: 1.18
+      - name: Install latest version of Kind
+        run: |
+          GO111MODULE=on go get sigs.k8s.io/kind
+      - name: Create Kind cluster
+        run: |
+          PATH=$(go env GOPATH)/bin:$PATH kind create cluster --config kind-config.yaml
+      - name: Run some sanity checks
+        # kubectl is already installed on the Github Ubuntu worker
+        run: |
+          kubectl get nodes -o wide
+          kubectl get pods --all-namespaces -o wide
+          kubectl get services --all-namespaces -o wide
       #- name: Setup tmate session
         #if: ${{ RUNNER_DEBUG }}=="1"
       #  uses: mxschmitt/action-tmate@v3
