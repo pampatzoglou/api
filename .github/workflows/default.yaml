@@ -186,8 +186,7 @@ jobs:
   KinD:
     strategy:
       matrix:
-        kind-version: ["v0.11.1"]
-        k8s-version: ["kindest/node:v1.23.6"]
+        environments: ["default"]
     needs:
       - credentials
       - build-push-development
@@ -196,15 +195,10 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - uses: engineerd/setup-kind@v0.5.0
-        with:
-          version: ${{ matrix.kind-version }}
-          image: ${{ matrix.k8s-version }}
       - name: Test cluster init
         run: |
           kubectl cluster-info
           kubectl get pods -n kube-system
-          echo "current-context:" $(kubectl config current-context)
-          echo "environment-kubeconfig:" ${KUBECONFIG}
       - name: Setup helmfile
         run: |
           curl -L https://github.com/roboll/helmfile/releases/download/v0.142.0/helmfile_linux_amd64 --output /usr/local/bin/helmfile
@@ -218,7 +212,7 @@ jobs:
           MONGODB_USERNAME: foo
           MONGODB_PASSWORD: bar
         run: |
-          helmfile --file deployments/helmfile.d/ apply
+          helmfile --file deployments/helmfile.d/ -e ${{ matrix.environments }} apply
 
   build-push-master:
     if: github.ref == 'refs/heads/master'
