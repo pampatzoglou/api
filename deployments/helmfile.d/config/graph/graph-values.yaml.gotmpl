@@ -1,9 +1,9 @@
 image:
-  repository: {{ .Environment.Values.registry.registry }}/api
+  repository: {{ .Environment.Values.registry.provider }}/api
   pullPolicy: IfNotPresent
   tag: {{ env "TAG" }}
   imageCredentials:
-    registry: {{ .Environment.Values.registry.registry }}
+    registry: {{ .Environment.Values.registry.provider }}
     username: {{ .Environment.Values.registry.username }}
     password: {{ .Environment.Values.registry.password }}
     email: {{ .Environment.Values.registry.email }}

@@ -36,7 +36,9 @@ jobs:
           helm plugin install https://github.com/databus23/helm-diff
       - name: Lint Helmfile
         env:
-          PAT: ${{ secrets.PAT }}
+          REGISTRY: ghcr.io/${{ github.repository }}
+          REGISTRY_USER: ${{ github.actor }}
+          REGISTRY_PAT: ${{ secrets.PAT }}
           MONGODB_USERNAME: foo
           MONGODB_PASSWORD: bar
         run: |

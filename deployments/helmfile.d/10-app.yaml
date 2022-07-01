@@ -1,3 +1,6 @@
+bases:
+- ../../environments.yaml
+
 helmDefaults:
   createNamespace: true
   wait: true
