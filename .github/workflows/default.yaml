@@ -21,6 +21,14 @@ jobs:
   lint:
     timeout-minutes: 5
     runs-on: ubuntu-latest
+    env:
+      REGISTRY: ghcr.io/${{ github.repository }}
+      REGISTRY_USER: ${{ github.actor }}
+      REGISTRY_PAT: ${{ secrets.PAT }}
+      TAG: ${{ github.sha }}
+      MONGODB_ROOT_PASSWORD: ${{ github.sha }}
+      MONGODB_USERNAME: ${{ github.actor }}
+      MONGODB_PASSWORD: ${{ github.run_id }}
     steps:
       - uses: actions/checkout@master
       - uses: hadolint/hadolint-action@v2.0.0
@@ -35,12 +43,6 @@ jobs:
           chmod a+x /usr/local/bin/helmfile
           helm plugin install https://github.com/databus23/helm-diff
       - name: Lint Helmfile
-        env:
-          REGISTRY: ghcr.io/${{ github.repository }}
-          REGISTRY_USER: ${{ github.actor }}
-          REGISTRY_PAT: ${{ secrets.PAT }}
-          MONGODB_USERNAME: foo
-          MONGODB_PASSWORD: bar
         run: |
           helmfile --file deployments/helmfile.d/ lint
       - name: golangci-lint
