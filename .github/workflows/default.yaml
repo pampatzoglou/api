@@ -213,7 +213,7 @@ jobs:
       - name: Create Kind cluster
         run: |
           PATH=$(go env GOPATH)/bin:$PATH kind create cluster --config ./deployments/kind-config.yaml
-      - name: Run some sanity checks
+      - name: Run some cluster sanity checks
         run: |
           kubectl cluster-info
           kubectl get nodes -o wide
@@ -228,6 +228,12 @@ jobs:
       - name: Deploy
         run: |
           helmfile --file deployments/helmfile.d/ -e ${{ matrix.environments }} apply
+      - name: Run some app sanity checks
+        run: |
+          kubectl get pods -n api -o wide
+          kubectl get services -n api -o wide
+          kubectl get deployments -n api -o wide
+          kubectl get pvc -n api -o wide
       - name: Setup tmate session
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
