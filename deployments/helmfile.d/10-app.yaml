@@ -13,5 +13,6 @@ releases:
   labels:
     app: api
     tier: backend
+    type: service
   values:
   - config/graph/graph-values.yaml.gotmpl

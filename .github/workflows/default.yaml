@@ -192,7 +192,7 @@ jobs:
     needs:
       - credentials
       - build-push-development
-    timeout-minutes: 15
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     env:
       REGISTRY: ghcr.io/${{ github.repository }}
@@ -230,10 +230,13 @@ jobs:
           helmfile --file deployments/helmfile.d/ -e ${{ matrix.environments }} apply
       - name: Run some app sanity checks
         run: |
-          kubectl get pods -n api -o wide
-          kubectl get services -n api -o wide
-          kubectl get deployments -n api -o wide
-          kubectl get pvc -n api -o wide
+          kubectl get deployments,services,pods,pvc -n api -o wide
+      - name: Grab some debug info
+        if: ${{ failure() }}
+        run: |
+          kubectl -n api describe deployment graph
+          kubectl -n api describe deployment mongo
+          kubectl logs -n api -l app.kubernetes.io/name=graph --tail 500
       - name: Setup tmate session
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
