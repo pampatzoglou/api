@@ -45,3 +45,13 @@ TODO: https://github.com/ddosify/ddosify
 ## health
 `http://localhost:9000/live`
 `http://localhost:9000/ready`
+
+
+curl -i -X POST --data '{__schema{queryType{fields{name}}}}' http://localhost:63201/query
+
+curl -g \
+	 -X POST \
+	 -H "Content-Type: application/json" \
+	 -d '{"query":"query{showCollection {items { title firstEpisodeDate lastEpisodeDate henshinMp4 { url }}}}"}' \
+	 http://localhost:63201/query
+
