@@ -35,4 +35,3 @@ spec:
     matchLabels:
       {{- include "graph.selectorLabels" . | nindent 6 }}
 {{- end }}
-{{- end }}
