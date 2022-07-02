@@ -31,8 +31,13 @@ func main() {
 			return nil
 		},
 	})
-
+	if err != nil {
+		log.Fatal(err)
+	}
 	r := chi.NewRouter()
 	r.Get("/status", h.HandlerFunc)
 	http.ListenAndServe(":"+cfg.Server.HealthPort, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

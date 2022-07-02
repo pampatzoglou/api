@@ -66,7 +66,7 @@ func main() {
 	defer mongo.Close(mongoClient, ctx, cancel)
 	fs := http.FileServer(http.Dir("./web/static"))
 	h, _ := health.New()
-	h.Register(health.Config{
+	err = h.Register(health.Config{
 		Name:      "mongo-check",
 		Timeout:   time.Second * 5,
 		SkipOnErr: true,
@@ -75,6 +75,9 @@ func main() {
 			return nil
 		},
 	})
+	if err != nil {
+		log.Fatal(err)
+	}
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 	http.Handle("/", fs)
 	http.Handle("/playground", playground.Handler("GraphQL playground", "/query"))
