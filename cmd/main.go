@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	_ "net/http/pprof"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/hellofresh/health-go/v4"
 	"github.com/pampatzoglou/api/config"
 	"github.com/pampatzoglou/api/graph"
 	"github.com/pampatzoglou/api/graph/generated"
@@ -61,31 +63,25 @@ func main() {
 		panic(err)
 	}
 
-	// Release resource when the main
-	// function is returned.
 	defer mongo.Close(mongoClient, ctx, cancel)
-	/*
-		log.Trace("Something very low level.")
-		log.Debug("Useful debugging information.")
-		log.Info("Something noteworthy happened!")
-		log.Warn("You should probably take a look at this.")
-		log.Error("Something failed but I'm not quitting.")
-	*/
 	fs := http.FileServer(http.Dir("./web/static"))
-	//h := healthpeak.NewHandler()
-	// Our app is not happy if we've got more than 100 goroutines running.
-	//h.AddLivenessCheck("goroutine-threshold", healthpeak.GoroutineCountCheck(100))
-	//h.AddReadinessCheck("mongo", mongo.HealthCheck(mongoClient, ctx))
-	//err = http.ListenAndServe("0.0.0.0:"+cfg.Server.HealthPort, h)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
+	h, _ := health.New()
+	h.Register(health.Config{
+		Name:      "mongo-check",
+		Timeout:   time.Second * 5,
+		SkipOnErr: true,
+		Check: func(ctx context.Context) error {
+			mongo.Ping(mongoClient, ctx)
+			return nil
+		},
+	})
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 	http.Handle("/", fs)
 	http.Handle("/playground", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
 	recordMetrics()
 	http.Handle("/metrics", promhttp.Handler())
+	http.Handle("/health", h.Handler())
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground and start queries", cfg.Server.Port)
 

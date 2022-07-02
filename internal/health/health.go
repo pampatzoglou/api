@@ -1,14 +1,18 @@
 package health
 
 import (
+	"context"
 	"log"
+	"net/http"
+	"time"
 
-	"github.com/hootsuite/healthchecks"
+	"github.com/go-chi/chi"
+	"github.com/hellofresh/health-go/v4"
 	"github.com/pampatzoglou/api/config"
 	"github.com/pampatzoglou/api/internal/mongo"
 )
 
-func CheckStatus() healthchecks.StatusList {
+func main() {
 	cfg := config.New()
 	mongoClient, ctx, cancel, err := mongo.Connect(cfg.Database.Connector)
 	if err != nil {
@@ -16,22 +20,19 @@ func CheckStatus() healthchecks.StatusList {
 		panic(err)
 	}
 	defer mongo.Close(mongoClient, ctx, cancel)
-	pong := mongo.Ping(mongoClient, ctx)
 
-	// Set a default response
-	s := healthchecks.Status{
-		Description: "mongo",
-		Result:      healthchecks.OK,
-	}
+	h, _ := health.New()
+	h.Register(health.Config{
+		Name:      "mongo-check",
+		Timeout:   time.Second * 5,
+		SkipOnErr: true,
+		Check: func(ctx context.Context) error {
+			mongo.Ping(mongoClient, ctx)
+			return nil
+		},
+	})
 
-	// Make sure the pong response is what we expected
-	if !pong {
-		s = healthchecks.Status{
-			Description: "mongo",
-			Result:      healthchecks.CRITICAL,
-		}
-	}
-
-	// Return our response
-	return healthchecks.StatusList{StatusList: []healthchecks.Status{s}}
+	r := chi.NewRouter()
+	r.Get("/status", h.HandlerFunc)
+	http.ListenAndServe(":"+cfg.Server.HealthPort, nil)
 }
