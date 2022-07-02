@@ -19,3 +19,6 @@ releases:
     app: mongo
     tier: backend
   condition: mongo.enabled
+  values:
+  - config/mongo/mongo-values.yaml
+  - config/mongo/mongo-{{ .Environment.Name }}-values.yaml.gotmpl
