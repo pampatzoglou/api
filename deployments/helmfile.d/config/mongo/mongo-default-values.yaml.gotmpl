@@ -1,0 +1,7 @@
+auth:
+  enabled: true
+  rootUser: root
+  rootPassword: {{ requiredEnv "MONGODB_ROOT_PASSWORD" | quote }}
+  username: {{ requiredEnv "MONGODB_USERNAME" | quote }}
+  password: {{ requiredEnv "MONGODB_PASSWORD" | quote }}
+  database: db

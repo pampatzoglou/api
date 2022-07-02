@@ -14,13 +14,21 @@ jobs:
       - name: trufflehog-actions-scan
         uses: edplato/trufflehog-actions-scan@master
         with:
-          scanArguments: "--regex --entropy=True --max_depth=1 --rules /regexes.json" # Add custom options here*
+          scanArguments: "--regex --entropy=True --max_depth=1" # --rules /regexes.json" # Add custom options here*
       - name: Check password
         uses: AlicanAkkus/pinder-action@0.1
 
   lint:
     timeout-minutes: 5
     runs-on: ubuntu-latest
+    env:
+      REGISTRY: ghcr.io/${{ github.repository }}
+      REGISTRY_USER: ${{ github.actor }}
+      REGISTRY_PAT: ${{ secrets.PAT }}
+      TAG: ${{ github.sha }}
+      MONGODB_ROOT_PASSWORD: ${{ github.sha }}
+      MONGODB_USERNAME: ${{ github.actor }}
+      MONGODB_PASSWORD: ${{ github.run_id }}
     steps:
       - uses: actions/checkout@master
       - uses: hadolint/hadolint-action@v2.0.0
@@ -35,12 +43,6 @@ jobs:
           chmod a+x /usr/local/bin/helmfile
           helm plugin install https://github.com/databus23/helm-diff
       - name: Lint Helmfile
-        env:
-          REGISTRY: ghcr.io/${{ github.repository }}
-          REGISTRY_USER: ${{ github.actor }}
-          REGISTRY_PAT: ${{ secrets.PAT }}
-          MONGODB_USERNAME: foo
-          MONGODB_PASSWORD: bar
         run: |
           helmfile --file deployments/helmfile.d/ lint
       - name: golangci-lint
@@ -192,6 +194,14 @@ jobs:
       - build-push-development
     timeout-minutes: 15
     runs-on: ubuntu-latest
+    env:
+      REGISTRY: ghcr.io/${{ github.repository }}
+      REGISTRY_USER: ${{ github.actor }}
+      REGISTRY_PAT: ${{ secrets.PAT }}
+      TAG: ${{ github.sha }}
+      MONGODB_ROOT_PASSWORD: ${{ github.sha }}
+      MONGODB_USERNAME: ${{ github.actor }}
+      MONGODB_PASSWORD: ${{ github.run_id }}
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-go@v1
@@ -203,7 +213,7 @@ jobs:
       - name: Create Kind cluster
         run: |
           PATH=$(go env GOPATH)/bin:$PATH kind create cluster --config ./deployments/kind-config.yaml
-      - name: Run some sanity checks
+      - name: Run some cluster sanity checks
         run: |
           kubectl cluster-info
           kubectl get nodes -o wide
@@ -216,15 +226,14 @@ jobs:
           chmod a+x /usr/local/bin/helmfile
           helm plugin install https://github.com/databus23/helm-diff
       - name: Deploy
-        env:
-          REGISTRY: ghcr.io/${{ github.repository }}
-          REGISTRY_USER: ${{ github.actor }}
-          REGISTRY_PAT: ${{ secrets.PAT }}
-          TAG: ${{ github.sha }}
-          MONGODB_USERNAME: foo
-          MONGODB_PASSWORD: bar
         run: |
           helmfile --file deployments/helmfile.d/ -e ${{ matrix.environments }} apply
+      - name: Run some app sanity checks
+        run: |
+          kubectl get pods -n api -o wide
+          kubectl get services -n api -o wide
+          kubectl get deployments -n api -o wide
+          kubectl get pvc -n api -o wide
       - name: Setup tmate session
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3

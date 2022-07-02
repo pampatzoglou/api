@@ -8,3 +8,5 @@ image:
     password: {{ .Environment.Values.registry.password }}
     email: {{ .Environment.Values.registry.email }}
 
+mongo:
+  connector:  {{ .Environment.Values.mongo.connector }}

@@ -84,3 +84,18 @@ affinity: {}
 
 mongo:
   connector: ""
+
+metrics:
+  serviceMonitor:
+    enabled: false
+    namespace: ""
+    jobLabel: ""
+    interval: 30s
+    scrapeTimeout: ""
+    honorLabels: false
+    labels: {}
+  prometheusRule:
+    enabled: false
+    namespace: ""
+    additionalLabels: {}
+    rules: []

@@ -1,0 +1,28 @@
+{{- if and .Values.metrics.serviceMonitor.enabled .Values.metrics.prometheusRule.enabled  }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "graph.fullname" . }}
+  {{- if .Values.metrics.prometheusRule.namespace }}
+  namespace: {{ .Values.metrics.prometheusRule.namespace }}
+  {{- else }}
+  namespace: {{ .Release.Namespace }}
+  {{- end }}
+  labels:
+    {{- include "graph.labels" . | nindent 4 }}
+    {{- if .Values.metrics.prometheusRule.additionalLabels }}
+      {{- with .Values.metrics.prometheusRule.additionalLabels }}
+        {{- toYaml . | nindent 4 }}
+      {{- end }}
+    {{- end }}
+    app.kubernetes.io/component: metrics
+spec:
+  groups:
+  - name: {{ include "graph.fullname" . }}
+  {{- if .Values.metrics.prometheusRule.rules }}
+    rules:
+      {{- with .Values.metrics.prometheusRule.rules }}
+        {{- toYaml . | nindent 4 }}
+      {{- end }}
+  {{- end }}
+{{- end }}
