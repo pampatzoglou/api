@@ -99,30 +99,20 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
+          username: ${{ github.GITHUB_REPOSITORY_OWNER }}
           password: ${{ secrets.PAT }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Cache Docker layers
         uses: actions/cache@v2
-        with:
-          path: /tmp/.buildx-cache/${{ github.repository }}
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-              ${{ runner.os }}-buildx-
       - name: Build and Push
         uses: docker/build-push-action@v3
         with:
           push: true
           tags: ghcr.io/${{ github.repository }}:${{ github.sha }}
           target: development
-          load: false
-          cache-from: type=local,src=/tmp/.buildx-cache/${{ github.repository }}
-          cache-to: type=local,dest=/tmp/.buildx-cache/${{ github.repository }}-new
-      - name: Move cache
-        run: |
-          rm -rf /tmp/.buildx-cache/${{ github.repository }}
-          mv /tmp/.buildx-cache/${{ github.repository }}-new /tmp/.buildx-cache/${{ github.repository }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   DevSecOps:
     needs:
@@ -138,22 +128,10 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
+          username: ${{ github.GITHUB_REPOSITORY_OWNER }}
           password: ${{ secrets.PAT }}
       - name: Cache Docker layers
         uses: actions/cache@v2
-        with:
-          path: /tmp/.buildx-cache/${{ github.repository }}
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-      - name: Cache vdb
-        uses: actions/cache@v2
-        with:
-          path: /tmp/.vdb
-          key: ${{ runner.os }}-vdb-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-vdb-
       - name: Scan
         uses: ShiftLeftSecurity/scan-action@master
         env:
@@ -170,16 +148,6 @@ jobs:
           name: shiftleft-reports-${{ github.sha }}
           path: reports
           retention-days: 30
-      #- name: Azure/container-scan
-      #  uses: azure/container-scan@v0
-      #  env:
-      #    DOCKER_CONTENT_TRUST: 1
-      #  with:
-      #    image-name: ghcr.io/${{ github.repository }}:${{ github.sha }}
-      #    username: ${{ github.actor }}
-      #    password: ${{ secrets.PAT }}
-      #    severity-threshold: LOW
-      #    run-quality-checks: false
       - name: Setup tmate session
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
@@ -258,23 +226,36 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
+          username: ${{ github.GITHUB_REPOSITORY_OWNER }}
           password: ${{ secrets.PAT }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Cache Docker layers
         uses: actions/cache@v2
+      - name: Build and Test
+        uses: docker/build-push-action@v3
         with:
-          path: /tmp/.buildx-cache/${{ github.repository }}
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-              ${{ runner.os }}-buildx-
-      - name: Build and Push
+          push: false
+          tags: ghcr.io/${{ github.repository }}:master
+          target: production
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Azure/container-scan
+        uses: azure/container-scan@v0
+        env:
+          DOCKER_CONTENT_TRUST: 1
+        with:
+          image-name: ghcr.io/${{ github.repository }}:master
+          username:  ${{ github.GITHUB_REPOSITORY_OWNER }}
+          password: ${{ secrets.PAT }}
+          run-quality-checks: false
+      - name: Push
         uses: docker/build-push-action@v3
         with:
           push: true
           tags: ghcr.io/${{ github.repository }}:master
           target: production
-          load: false
-          cache-from: type=local,src=/tmp/.buildx-cache/${{ github.repository }}
-          cache-to: type=local,dest=/tmp/.buildx-cache/${{ github.repository }}-new
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
