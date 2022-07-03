@@ -294,9 +294,9 @@ jobs:
       REGISTRY_USER: ${{ github.actor }}
       REGISTRY_PAT: ${{ secrets.PAT }}
       TAG: master
-      MONGODB_ROOT_PASSWORD: ${{ github.sha }}
-      MONGODB_USERNAME: ${{ github.actor }}
-      MONGODB_PASSWORD: ${{ github.run_id }}
+      MONGODB_ROOT_PASSWORD: ${{ secrets.MONGODB_ROOT_PASSWORD }}
+      MONGODB_USERNAME: ${{ secrets.MONGODB_USERNAME }}
+      MONGODB_PASSWORD: ${{ secrets.MONGODB_PASSWORD }}
       DOCKER_CONTENT_TRUST: 1
     steps:
       - uses: actions/checkout@master
