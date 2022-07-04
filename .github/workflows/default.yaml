@@ -276,37 +276,7 @@ jobs:
           tags: ghcr.io/${{ github.repository }}:master
           target: production
           load: false
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: linux/amd64,linux/arm64
           cache-from: type=local,src=/tmp/.buildx-cache/${{ github.repository }}
           cache-to: type=local,dest=/tmp/.buildx-cache/${{ github.repository }}-new
 
-  deploy-staging:
-    if: github.ref == 'refs/heads/master'
-    needs:
-      - build-push-master
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        environments: ["default"]
-    timeout-minutes: 10
-    env:
-      REGISTRY: ghcr.io/${{ github.repository }}
-      REGISTRY_USER: ${{ github.actor }}
-      REGISTRY_PAT: ${{ secrets.PAT }}
-      TAG: master
-      MONGODB_ROOT_PASSWORD: ${{ secrets.MONGODB_ROOT_PASSWORD }}
-      MONGODB_USERNAME: ${{ secrets.MONGODB_USERNAME }}
-      MONGODB_PASSWORD: ${{ secrets.MONGODB_PASSWORD }}
-      DOCKER_CONTENT_TRUST: 1
-    steps:
-      - uses: actions/checkout@master
-      - name: Setup helmfile
-        run: |
-          curl -L https://github.com/roboll/helmfile/releases/download/v0.142.0/helmfile_linux_amd64 --output /usr/local/bin/helmfile
-          chmod a+x /usr/local/bin/helmfile
-          helm plugin install https://github.com/databus23/helm-diff
-      - name: Deploy
-        run: |
-          echo -n ${{ secrets.B64_KUBE_CONFIG }} | base64 --decode > .kube/config
-          kubectl cluster-info
-          helmfile --file deployments/helmfile.d/ -e ${{ matrix.environments }} apply
