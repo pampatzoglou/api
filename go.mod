@@ -4,10 +4,9 @@ go 1.18
 
 require (
 	github.com/99designs/gqlgen v0.17.10
-	github.com/go-chi/chi v1.5.4
 	github.com/prometheus/client_golang v1.12.2
 	github.com/sirupsen/logrus v1.8.1
-	github.com/vektah/gqlparser/v2 v2.4.5
+	github.com/vektah/gqlparser/v2 v2.4.6
 	go.mongodb.org/mongo-driver v1.9.1
 )
 
