@@ -260,6 +260,8 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.PAT }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Cache Docker layers
@@ -276,7 +278,7 @@ jobs:
           tags: ghcr.io/${{ github.repository }}:master
           target: production
           load: false
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           cache-from: type=local,src=/tmp/.buildx-cache/${{ github.repository }}
           cache-to: type=local,dest=/tmp/.buildx-cache/${{ github.repository }}-new
 
