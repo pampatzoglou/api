@@ -250,8 +250,6 @@ jobs:
       - KinD
     timeout-minutes: 5
     runs-on: ubuntu-latest
-    env:
-      DOCKER_CONTENT_TRUST: 1
     steps:
       - uses: actions/checkout@master
       - name: Login to GitHub Container Registry
