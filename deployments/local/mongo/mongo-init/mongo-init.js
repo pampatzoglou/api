@@ -25,17 +25,14 @@ db.shop.insertOne({ "address": { "city": "Paris", "zip": "123" }, "afm":345, "na
 db.shop.insertOne({ "address": { "city": "Marsel", "zip": "321" }, "afm":435, "name": "Shop2", "phone": "4321" });
 
 db.createCollection('item');
-db.shop.insertOne({  "cost":12.5, "name": "Peponi", "category": "fruit" });
-db.shop.insertOne({  "cost":12, "name": "Karpouzi", "category": "fruit" });
-db.shop.insertOne({  "cost":19, "name": "Mousakas", "category": "food" });
+db.item.insertOne({  "cost":12.5, "name": "Peponi", "category": "fruit" });
+db.item.insertOne({  "cost":12, "name": "Karpouzi", "category": "fruit" });
+db.item.insertOne({  "cost":19, "name": "Mousakas", "category": "food" });
 
 db.createCollection('user');
-db.shop.insertOne({ "name": "Pantelis", "category": "admin" });
-db.shop.insertOne({ "name": "Dimos", "category": "customer" });
+db.user.insertOne({ "name": "Pantelis", "category": "admin" });
+db.user.insertOne({ "name": "Dimos", "category": "customer" });
 
-db.createCollection('owner')
-db.createCollection('item')
-db.createCollection('client')
 
 
 
