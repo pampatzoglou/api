@@ -17,8 +17,6 @@
 .env
 
 
-deployments/local/mongo/data
-deployments/local/mongo/data/**
-deployments/local/mongo/data/db
-deployments/local/mongo/data/db/**
+
 !deployments/local/redis/rejson.so
+!deployments/local/mongo/data/db/.keep
