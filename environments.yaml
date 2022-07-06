@@ -3,9 +3,9 @@ environments:
     values:
     - registry:
         provider: ghcr.io/pampatzoglou
-        username: {{ requiredEnv "REGISTRY_USER"}}
-        password: {{ requiredEnv "REGISTRY_PAT" }}
+        username: {{ env "REGISTRY_USER" | default "pampatzoglou" }}
+        password: {{ env "REGISTRY_PAT" | default "REGISTRY_PAT" }}
         email:    devops+api@foo.ddd
     - mongo:
         enabled: true
-        connector:  mongodb://{{ requiredEnv "MONGODB_USERNAME" }}:{{ requiredEnv "MONGODB_PASSWORD" }}@mongo-mongodb:27017/db
+        connector:  mongodb://{{ env "MONGODB_USERNAME" | default "MONGO" }}:{{ env "MONGODB_PASSWORD" | default "MONGODB_PASSWORD" }}@mongo-mongodb:27017/db
