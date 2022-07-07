@@ -1,7 +1,10 @@
 auth:
   enabled: true
   rootUser: root
-  rootPassword: {{ env "MONGODB_ROOT_PASSWORD" | default "MONGODB_ROOT_PASSWORD" }}
-  username: {{ env "MONGODB_USERNAME" | default "MONGO" }}
-  password: {{ env "MONGODB_PASSWORD" | default "MONGODB_PASSWORD" }}
-  database: db
+  rootPassword: {{ env "MONGODB_ROOT_PASSWORD" | default "MONGODB_ROOT_PASSWORD" | quote }}
+  usernames:
+  - {{ env "MONGODB_USERNAME" | default "MONGO" }}
+  passwords:
+  - {{ env "MONGODB_PASSWORD" | default "MONGODB_PASSWORD" | quote }}
+  databases: 
+  - db
