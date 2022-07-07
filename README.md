@@ -55,3 +55,7 @@ curl -g \
 	 -d '{"query":"query{showCollection {items { title firstEpisodeDate lastEpisodeDate henshinMp4 { url }}}}"}' \
 	 http://localhost:63201/query
 
+# Development on Kubernetes
+1. Connect to a cluster. eg: '''kind create cluster'''
+2. Sping up Tilt: '''tilt up'''
+3. Connect to tilt page eg: '''http://localhost:10350/'''
