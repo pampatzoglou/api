@@ -1,7 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "graph.fullname" . }}
+  name: {{ .Release.Name | quote }}
+  namespace: {{ .Release.Namespace | quote }}
   labels:
     {{- include "graph.labels" . | nindent 4 }}
 spec:
@@ -22,7 +23,7 @@ spec:
         {{- include "graph.selectorLabels" . | nindent 8 }}
     spec:
       imagePullSecrets:
-        - name: {{ include "graph.fullname" . }}-registrykey
+        - name: {{ .Release.Name | quote }}-registrykey
       {{- with .Values.imagePullSecrets }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -63,7 +64,7 @@ spec:
           - name: MONGO_CONNECTOR
             valueFrom:
               secretKeyRef:
-                name: {{ include "graph.fullname" . }}-mongo
+                name: {{ .Release.Name | quote }}-mongo
                 key: connector
           ports:
             - name: http
@@ -71,7 +72,7 @@ spec:
               protocol: TCP
           startupProbe:
             httpGet:
-              path: /
+              path: /playground
               port: http
             failureThreshold: 30
             periodSeconds: 10

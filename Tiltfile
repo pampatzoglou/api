@@ -59,7 +59,7 @@ namespace_create('api')
 # k8s_yaml(['k8s/deployment.yaml', 'k8s/service.yaml'])
 k8s_yaml(helmfile("deployments/helmfile.d/00-requirements.yaml"))
 k8s_yaml(helmfile("deployments/helmfile.d/10-app.yaml"))
-
+watch_file('deployments')
 
 # Customize a Kubernetes resource
 #   By default, Kubernetes resource names are automatically assigned
@@ -125,6 +125,12 @@ def tilt_demo():
     git_checkout('https://github.com/tilt-dev/tilt-avatars.git',
                  checkout_dir='tilt-avatars')
 
+
+k8s_resource(
+   workload='graph', port_forwards=[
+      port_forward(8000, 8000, name='api-graph'), 
+   ]
+)
 
 # Edit your Tiltfile without restarting Tilt
 #   While running `tilt up`, Tilt watches the Tiltfile on disk and
