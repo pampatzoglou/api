@@ -2,7 +2,7 @@
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ .Release.Name | quote }}
+  name: {{ include "graph.fullname" . }}
   namespace: {{ .Release.Namespace | quote }}
   labels:
     {{- include "graph.labels" . | nindent 4 }}
@@ -10,7 +10,7 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ .Release.Name | quote }}
+    name: {{ include "graph.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:

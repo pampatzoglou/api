@@ -2,7 +2,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: {{ .Release.Name | quote }}
+  name: {{ include "graph.fullname" . }}
   {{- if .Values.metrics.prometheusRule.namespace }}
   namespace: {{ .Values.metrics.prometheusRule.namespace }}
   {{- else }}
@@ -18,7 +18,7 @@ metadata:
     app.kubernetes.io/component: metrics
 spec:
   groups:
-  - name: {{ .Release.Name | quote }}
+  - name: {{ include "graph.fullname" . }}
   {{- if .Values.metrics.prometheusRule.rules }}
     rules:
       {{- with .Values.metrics.prometheusRule.rules }}

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: "{{ .Release.Name | quote }}-test-playground-connection"
+  name: "{{ include "graph.fullname" . }}-test-playground-connection"
   namespace: {{ .Release.Namespace | quote }}
   labels:
     {{- include "graph.labels" . | nindent 4 }}
@@ -12,5 +12,5 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['http://{{ .Release.Name | quote }}.{{ .Release.Namespace }}:{{ .Values.service.port }}/playground']
+      args: ['http://{{ include "graph.fullname" . }}.{{ .Release.Namespace }}:{{ .Values.service.port }}/playground']
   restartPolicy: Never
