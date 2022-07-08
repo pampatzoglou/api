@@ -133,11 +133,10 @@ func main() {
 
 	//log.Printf("connect to http://localhost:%s/ for GraphQL playground and start queries", cfg.Server.Port)
 
-	//go http.ListenAndServe(":8013", routerMetrics)
-	//fmt.Println("Serving requests on port 8013")
+	go http.ListenAndServe(":9000", routerMetrics)
+	fmt.Println("Serving requests on port 9000")
+	fmt.Println("Serving requests on port 8000")
+	http.ListenAndServe(":8000", router)
 
-	http.ListenAndServe(":8012", router)
-	fmt.Println("Serving requests on port 8012")
-
-	select {} // block forever to prevent exiting
+	//select {} // block forever to prevent exiting
 }
