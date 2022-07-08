@@ -120,29 +120,24 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	routerMetrics := mux.NewRouter()
+	routerMetrics.Use(prometheusMiddleware)
+	routerMetrics.Handle("/metrics", promhttp.Handler())
 
 	router := mux.NewRouter()
-	router.Use(prometheusMiddleware)
-
-	// Prometheus endpoint
-	router.Handle("/prometheus", promhttp.Handler())
-
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
-
 	router.Handle("/", fs)
 	router.Handle("/playground", playground.Handler("GraphQL playground", "/query"))
 	router.Handle("/query", srv)
-	router.Handle("/metrics", promhttp.Handler())
-	// http.Handle("/health", h.Handler())
+	router.Handle("/health", h.Handler())
 
 	//log.Printf("connect to http://localhost:%s/ for GraphQL playground and start queries", cfg.Server.Port)
 
-	fmt.Println("Serving requests on port 8000")
-	err = http.ListenAndServe(":8000", router)
+	//go http.ListenAndServe(":8013", routerMetrics)
+	//fmt.Println("Serving requests on port 8013")
 
-	//	err = http.ListenAndServe(":"+cfg.Server.Port, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
+	http.ListenAndServe(":8012", router)
+	fmt.Println("Serving requests on port 8012")
 
+	select {} // block forever to prevent exiting
 }
