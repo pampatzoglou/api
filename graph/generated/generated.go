@@ -149,15 +149,14 @@ var sources = []*ast.Source{
 #
 # https://gqlgen.com/getting-started/
 
-type Shop{ 
+type Shop {
   id: ID!
   name: String!
 }
 
 type Query {
   shops: [Shop!]!
-}
-`, BuiltIn: false},
+}`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 

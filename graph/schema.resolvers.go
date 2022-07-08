@@ -5,15 +5,20 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/pampatzoglou/api/graph/generated"
 	"github.com/pampatzoglou/api/graph/model"
+	"github.com/pampatzoglou/api/internal/mongo"
+)
+
+var (
+	shopRepository mongo.ShopRepository = mongo.NewShopRepository()
 )
 
 // Shops is the resolver for the shops field.
 func (r *queryResolver) Shops(ctx context.Context) ([]*model.Shop, error) {
-	panic(fmt.Errorf("not implemented"))
+	// panic(fmt.Errorf("not implemented"))
+	return shopRepository.FindAll(), nil
 }
 
 // Query returns generated.QueryResolver implementation.
