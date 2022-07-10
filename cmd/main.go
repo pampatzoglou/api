@@ -25,6 +25,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/go-redis/redis"
+	// https://betterprogramming.pub/graphql-subscriptions-with-go-6eb25dec5cd1
+	//https://github.com/scorpionknifes/gqlmanage
 )
 
 type responseWriter struct {
@@ -111,13 +113,6 @@ func main() {
 		fmt.Println(err)
 	}
 	fmt.Println(pong)
-
-	val, err := client.Get("62c3f6c00567713d43382541").Result()
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(val)
-
 	//End Redis
 
 	log.Println("os.Args", os.Args)
