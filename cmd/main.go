@@ -82,14 +82,6 @@ func prometheusMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// Redis
-type Shop struct {
-	Name string `json:"name"`
-	Id   string `json:"id"`
-}
-
-//
-
 func init() {
 	prometheus.Register(totalRequests)
 	prometheus.Register(responseStatus)
@@ -161,10 +153,11 @@ func main() {
 
 	//log.Printf("connect to http://localhost:%s/ for GraphQL playground and start queries", cfg.Server.Port)
 
-	go http.ListenAndServe(":9000", routerMetrics)
+	// go http.ListenAndServe(":9000", routerMetrics)
+	go log.Fatal(http.ListenAndServe(":8000", routerMetrics))
 	fmt.Println("Serving requests on port 9000")
 	fmt.Println("Serving requests on port 8000")
-	http.ListenAndServe(":8000", router)
-
+	// http.ListenAndServe(":8000", router)
+	log.Fatal(http.ListenAndServe(":8000", router))
 	//select {} // block forever to prevent exiting
 }
