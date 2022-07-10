@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/mitchellh/mapstructure"
 	"github.com/pampatzoglou/api/config"
 	"github.com/pampatzoglou/api/graph/model"
 	"go.mongodb.org/mongo-driver/bson"
@@ -69,20 +70,75 @@ func (db *database) Save(shop *model.Shop) {
 }
 
 func (db *database) FindAll() []*model.Shop {
+
+	ctx := context.Background()
+
+	isCached, productsCache, err := getFromCache(ctx)
+
+	if err != nil {
+
+		fmt.Println(err)
+
+	} else if isCached == true {
+
+		fmt.Println("is cached", productsCache["data"])
+
+		var s []interface{} = productsCache["data"].([]interface{})
+		fmt.Println(s)
+		var shop *model.Shop
+		var result []*model.Shop
+		for _, v := range s { // use type assertion to loop over []interface{}
+			mapstructure.Decode(v, &shop)
+			result = append(result, shop)
+		}
+		fmt.Println(result)
+		return result
+		// Convert json string to struct
+		//	var v *model.Shop
+		//	if err := json.Unmarshal(productsCache, &v); err != nil {
+		//		fmt.Println(err)
+		//	}
+		//var results []*model.Shop
+		//	results = append(results, v)
+		//return results
+
+	}
+
 	collection := db.client.Database(DATABASE).Collection(COLLECTION)
 	cursor, err := collection.Find(context.TODO(), bson.D{})
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer cursor.Close(context.TODO())
+
 	var results []*model.Shop
+	// var records []bson.M
 	for cursor.Next(context.TODO()) {
 		var v *model.Shop
+		//	var record bson.M
 		err := cursor.Decode(&v)
 		if err != nil {
 			log.Fatal(err)
 		}
 		results = append(results, v)
+		// records = append(records, v)
 	}
+	res := map[string]interface{}{}
+
+	res = map[string]interface{}{
+		"data": results,
+	}
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println("not cached", res)
+
+	err = addToCache(ctx, res)
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	return results
+
 }

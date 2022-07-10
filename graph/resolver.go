@@ -1,6 +1,9 @@
 package graph
 
-import "github.com/pampatzoglou/api/graph/model"
+import (
+	"github.com/go-redis/redis/v8"
+	"github.com/pampatzoglou/api/graph/model"
+)
 
 // This file will not be regenerated automatically.
 //
@@ -8,4 +11,5 @@ import "github.com/pampatzoglou/api/graph/model"
 
 type Resolver struct {
 	shops []*model.Shop
+	Redis redis.Client
 }

@@ -23,6 +23,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+
+	"github.com/go-redis/redis"
 )
 
 type responseWriter struct {
@@ -78,6 +80,14 @@ func prometheusMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+// Redis
+type Shop struct {
+	Name string `json:"name"`
+	Id   string `json:"id"`
+}
+
+//
+
 func init() {
 	prometheus.Register(totalRequests)
 	prometheus.Register(responseStatus)
@@ -86,7 +96,30 @@ func init() {
 
 func main() {
 
-	//
+	//Redis
+	//https://tutorialedge.net/golang/go-redis-tutorial/
+
+	fmt.Println("Testing Golang Redis")
+	client := redis.NewClient(&redis.Options{
+		Addr:     "redis:6379",
+		Password: "",
+		DB:       0,
+	})
+
+	pong, err := client.Ping().Result()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(pong)
+
+	val, err := client.Get("62c3f6c00567713d43382541").Result()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(val)
+
+	//End Redis
+
 	log.Println("os.Args", os.Args)
 	cfg := config.New()
 
