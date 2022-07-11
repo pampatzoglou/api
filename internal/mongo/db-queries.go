@@ -79,7 +79,7 @@ func (db *database) FindAll() []*model.Shop {
 
 		fmt.Println(err)
 
-	} else if isCached == true {
+	} else if isCached {
 
 		fmt.Println("is cached", productsCache["data"])
 
@@ -88,7 +88,10 @@ func (db *database) FindAll() []*model.Shop {
 		var shop *model.Shop
 		var result []*model.Shop
 		for _, v := range s { // use type assertion to loop over []interface{}
-			mapstructure.Decode(v, &shop)
+			err := mapstructure.Decode(v, &shop)
+			if err != nil {
+				panic(err)
+			}
 			result = append(result, shop)
 		}
 		fmt.Println(result)

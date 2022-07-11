@@ -83,9 +83,18 @@ func prometheusMiddleware(next http.Handler) http.Handler {
 }
 
 func init() {
-	prometheus.Register(totalRequests)
-	prometheus.Register(responseStatus)
-	prometheus.Register(httpDuration)
+	err := prometheus.Register(totalRequests)
+	if err != nil {
+		panic(err)
+	}
+	err = prometheus.Register(responseStatus)
+	if err != nil {
+		panic(err)
+	}
+	err = prometheus.Register(httpDuration)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func main() {
