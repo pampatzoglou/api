@@ -5,25 +5,23 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/pampatzoglou/api/graph/generated"
 	"github.com/pampatzoglou/api/graph/model"
+	"github.com/pampatzoglou/api/internal/mongo"
 )
 
-func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
-	panic(fmt.Errorf("not implemented"))
-}
+var (
+	shopRepository mongo.ShopRepository = mongo.NewShopRepository()
+)
 
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	panic(fmt.Errorf("not implemented"))
+// Shops is the resolver for the shops field.
+func (r *queryResolver) Shops(ctx context.Context) ([]*model.Shop, error) {
+	// panic(fmt.Errorf("not implemented"))
+	return shopRepository.FindAll(), nil
 }
-
-// Mutation returns generated.MutationResolver implementation.
-func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
-type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }

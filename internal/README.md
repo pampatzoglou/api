@@ -15,7 +15,17 @@ Examples:
 
 ## `/internal/pkg`
 
+
 Examples:
 
 * https://github.com/hashicorp/waypoint/tree/main/internal/pkg
+
+## generate schema graph gqlgen
+if there is no graphql structure in the project 
+then
+go run github.com/99designs/gqlgen init ( https://gqlgen.com/getting-started/ )
+create schema in graph/schema.graphqls
+then
+go get -d github.com/99designs/gqlgen
+go run github.com/99designs/gqlgen generate
 
