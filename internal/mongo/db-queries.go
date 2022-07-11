@@ -126,9 +126,8 @@ func (db *database) FindAll() []*model.Shop {
 		results = append(results, v)
 		// records = append(records, v)
 	}
-	res := map[string]interface{}{}
 
-	res = map[string]interface{}{
+	res := map[string]interface{}{
 		"data": results,
 	}
 	if err != nil {
