@@ -1,4 +1,4 @@
-FROM golang:1.18.3-alpine3.16 AS development
+FROM golang:1.18.4-alpine3.16 AS development
 ENV GO111MODULE=on \
     CGO_ENABLED=1  \
     GOARCH=amd64 \
@@ -11,7 +11,7 @@ EXPOSE 8000 9000
 HEALTHCHECK --interval=5m --timeout=3s CMD curl --fail http://localhost:8000/ || exit 1
 CMD ["go", "run", "./cmd"]
 
-FROM golang:1.18.3-alpine3.16 AS build
+FROM golang:1.18.4-alpine3.16 AS build
 ENV GO111MODULE=on \
     CGO_ENABLED=1  \
     GOARCH=amd64 \
