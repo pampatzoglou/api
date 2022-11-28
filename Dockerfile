@@ -21,7 +21,7 @@ COPY --from=development /app/ /app/
 WORKDIR  /app/cmd
 RUN go build -o app
 
-FROM alpine:3.16 AS production
+FROM alpine:3.17 AS production
 
 COPY --from=build /app/cmd/app /usr/local/app
 EXPOSE 8000 9000
