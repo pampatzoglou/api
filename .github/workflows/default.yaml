@@ -116,6 +116,9 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.repository }}:${{ github.sha }}
           target: development
+          build-args: |
+            TIMESTAMP=$(date -u +%s)
+            HASH_VALUE=${{ github.sha }}
           load: false
           cache-from: type=local,src=/tmp/.buildx-cache/${{ github.repository }}
           cache-to: type=local,dest=/tmp/.buildx-cache/${{ github.repository }}-new
