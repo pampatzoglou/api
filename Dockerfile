@@ -22,6 +22,10 @@ WORKDIR  /app/cmd
 RUN go build -o app
 
 FROM alpine:3.16 AS production
+ARG TIMESTAMP
+ARG HASH_VALUE
+ENV BUILD_TIME=${TIMESTAMP}
+ENV COMMIT_HASH=${HASH_VALUE}
 
 COPY --from=build /app/cmd/app /usr/local/app
 EXPOSE 8000 9000
