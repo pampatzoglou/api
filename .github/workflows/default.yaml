@@ -110,6 +110,9 @@ jobs:
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
               ${{ runner.os }}-buildx-
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +%s)"
       - name: Build and Push
         uses: docker/build-push-action@v3
         with:
@@ -117,7 +120,7 @@ jobs:
           tags: ghcr.io/${{ github.repository }}:${{ github.sha }}
           target: development
           build-args: |
-            TIMESTAMP=$(date -u +%s)
+            TIMESTAMP=${{ steps.date.outputs.date }}
             HASH_VALUE=${{ github.sha }}
           load: false
           cache-from: type=local,src=/tmp/.buildx-cache/${{ github.repository }}
