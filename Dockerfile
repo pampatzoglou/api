@@ -4,6 +4,11 @@ ENV GO111MODULE=on \
     GOARCH=amd64 \
     GOOS=linux
 
+ARG TIMESTAMP
+ARG HASH_VALUE
+ENV BUILD_TIME=${TIMESTAMP}
+ENV COMMIT_HASH=${HASH_VALUE}
+
 WORKDIR /app
 COPY . .
 RUN go mod download && go mod tidy -go=1.18
